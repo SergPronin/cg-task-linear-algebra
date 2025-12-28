@@ -47,6 +47,21 @@ public class Vector2 {
     }
 
     /**
+     * Устанавливает все координаты вектора
+     */
+    public void set(float x, float y) {
+        this.x = x;
+        this.y = y;
+    }
+
+    /**
+     * Получить координаты вектора в виде массива [x, y]
+     */
+    public float[] toArray() {
+        return new float[]{x, y};
+    }
+
+    /**
      * Сложение векторов: this + other
      */
     public Vector2 add(Vector2 other) {

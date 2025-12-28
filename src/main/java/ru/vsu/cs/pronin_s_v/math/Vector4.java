@@ -82,6 +82,23 @@ public class Vector4 {
         this.w = w;
     }
 
+    /**
+     * Устанавливает все координаты вектора
+     */
+    public void set(float x, float y, float z, float w) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+        this.w = w;
+    }
+
+    /**
+     * Получить координаты вектора в виде массива [x, y, z, w]
+     */
+    public float[] toArray() {
+        return new float[]{x, y, z, w};
+    }
+
     /***
      * Сложение векторов: this + other
      * @param other

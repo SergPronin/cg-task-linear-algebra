@@ -58,6 +58,22 @@ public class Vector3 {
     }
 
     /**
+     * Устанавливает все координаты вектора
+     */
+    public void set(float x, float y, float z) {
+        this.x = x;
+        this.y = y;
+        this.z = z;
+    }
+
+    /**
+     * Получить координаты вектора в виде массива [x, y, z]
+     */
+    public float[] toArray() {
+        return new float[]{x, y, z};
+    }
+
+    /**
      * Сложение векторов: this + other
      */
     public Vector3 add(Vector3 other) {
