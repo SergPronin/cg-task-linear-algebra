@@ -16,8 +16,12 @@ public class Vector4 {
         this(0.0f, 0.0f, 0.0f, 0.0f);
     }
 
-    /**
+    /***
      * Создает вектор с заданными координатами
+     * @param x
+     * @param y
+     * @param z
+     * @param w
      */
     public Vector4(float x, float y, float z, float w) {
         this.x = x;
@@ -78,8 +82,10 @@ public class Vector4 {
         this.w = w;
     }
 
-    /**
+    /***
      * Сложение векторов: this + other
+     * @param other
+     * @return
      */
     public Vector4 add(Vector4 other) {
         if (other == null) {
