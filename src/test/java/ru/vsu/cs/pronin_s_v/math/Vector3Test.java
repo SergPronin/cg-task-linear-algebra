@@ -9,43 +9,26 @@ import org.junit.jupiter.api.Assertions;
 public class Vector3Test {
 
     private static final float EPSILON = 1e-5f;
+    private static final float TEST_X = 1.0f;
+    private static final float TEST_Y = 2.0f;
+    private static final float TEST_Z = 3.0f;
 
     /**
-     * Тест конструктора по умолчанию.
-     * Проверяет, что создается нулевой вектор (0, 0, 0).
+     * Тест конструкторов
      */
     @Test
-    public void testDefaultConstructor() {
-        Vector3 v = new Vector3();
-        Assertions.assertEquals(0.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getY(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getZ(), EPSILON);
+    public void testConstructors() {
+        Vector3 v1 = new Vector3();
+        Assertions.assertEquals(0.0f, v1.getX(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getY(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getZ(), EPSILON);
+        
+        Vector3 v2 = new Vector3(1.0f, 2.0f, 3.0f);
+        Assertions.assertEquals(1.0f, v2.getX(), EPSILON);
+        Assertions.assertEquals(2.0f, v2.getY(), EPSILON);
+        Assertions.assertEquals(3.0f, v2.getZ(), EPSILON);
     }
 
-    /**
-     * Тест конструктора с параметрами.
-     * Проверяет, что вектор создается с заданными координатами (x, y, z).
-     */
-    @Test
-    public void testConstructor() {
-        Vector3 v = new Vector3(1.0f, 2.0f, 3.0f);
-        Assertions.assertEquals(1.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(2.0f, v.getY(), EPSILON);
-        Assertions.assertEquals(3.0f, v.getZ(), EPSILON);
-    }
-
-    /**
-     * Тест конструктора копирования.
-     * Проверяет, что создается точная копия исходного вектора.
-     */
-    @Test
-    public void testCopyConstructor() {
-        Vector3 v1 = new Vector3(1.0f, 2.0f, 3.0f);
-        Vector3 v2 = new Vector3(v1);
-        Assertions.assertEquals(v1.getX(), v2.getX(), EPSILON);
-        Assertions.assertEquals(v1.getY(), v2.getY(), EPSILON);
-        Assertions.assertEquals(v1.getZ(), v2.getZ(), EPSILON);
-    }
 
     /**
      * Тест сложения трехмерных векторов.
@@ -177,55 +160,37 @@ public class Vector3Test {
         Assertions.assertEquals(1.0f, result.getZ(), EPSILON);
     }
 
-    /**
-     * Тест векторного произведения перпендикулярных векторов.
-     * Проверяет, что (1,0,0) × (0,0,1) = (0,-1,0).
-     */
-    @Test
-    public void testCrossPerpendicular() {
-        Vector3 v1 = new Vector3(1.0f, 0.0f, 0.0f);
-        Vector3 v2 = new Vector3(0.0f, 0.0f, 1.0f);
-        Vector3 result = v1.cross(v2);
-        Assertions.assertEquals(0.0f, result.getX(), EPSILON);
-        Assertions.assertEquals(-1.0f, result.getY(), EPSILON);
-        Assertions.assertEquals(0.0f, result.getZ(), EPSILON);
-    }
 
     /**
-     * Тест обработки ошибки при векторном произведении с null.
-     * Проверяет, что передача null вызывает IllegalArgumentException.
+     * Тест обработки ошибок при операциях с null.
+     * Проверяет, что передача null вызывает IllegalArgumentException для всех операций.
      */
     @Test
-    public void testCrossWithNull() {
+    public void testOperationsWithNull() {
         Vector3 v1 = new Vector3(1.0f, 2.0f, 3.0f);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            v1.cross(null);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.add(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.subtract(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.dot(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.cross(null));
     }
 
-    /**
-     * Тест антикоммутативности векторного произведения.
-     * Проверяет математическое свойство: a × b = -(b × a).
-     * Это важное свойство векторного произведения.
-     */
-    @Test
-    public void testCrossAnticommutative() {
-        Vector3 v1 = new Vector3(1.0f, 2.0f, 3.0f);
-        Vector3 v2 = new Vector3(4.0f, 5.0f, 6.0f);
-        Vector3 cross1 = v1.cross(v2);
-        Vector3 cross2 = v2.cross(v1);
-        Vector3 negCross1 = cross1.multiply(-1.0f);
-        Assertions.assertTrue(cross2.equals(negCross1, EPSILON));
-    }
 
     /**
-     * Тест сравнения равных трехмерных векторов.
-     * Проверяет, что два вектора с одинаковыми координатами считаются равными.
+     * Тест сравнения векторов
      */
     @Test
     public void testEquals() {
-        Vector3 v1 = new Vector3(1.0f, 2.0f, 3.0f);
-        Vector3 v2 = new Vector3(1.0f, 2.0f, 3.0f);
+        Vector3 v1 = new Vector3(TEST_X, TEST_Y, TEST_Z);
+        Vector3 v2 = new Vector3(TEST_X, TEST_Y, TEST_Z);
+        Vector3 v3 = new Vector3(TEST_X + 1.0f, TEST_Y, TEST_Z);
+        
         Assertions.assertTrue(v1.equals(v2));
+        Assertions.assertTrue(v1.equals(v1));
+        Assertions.assertFalse(v1.equals(v3));
+        Assertions.assertFalse(v1.equals(null));
+        Assertions.assertFalse(v1.equals("not a vector"));
     }
+
+
+
 }

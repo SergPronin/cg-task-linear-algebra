@@ -1,14 +1,18 @@
 package ru.vsu.cs.pronin_s_v.math;
 
+import java.util.Arrays;
+
 /**
- * Класс для работы с матрицами 3x3
+ * Класс для работы с матрицами 3×3
  */
 public class Matrix3 {
     private static final int SIZE = 3;
+    private static final float EPSILON = 1e-7f;
+    
     private final float[] matrix;
 
     /**
-     * Создает единичную матрицу 3x3
+     * Создает единичную матрицу
      */
     public Matrix3() {
         matrix = new float[SIZE * SIZE];
@@ -16,27 +20,34 @@ public class Matrix3 {
     }
 
     /**
-     * Создает нулевую матрицу 3x3
+     * Создает нулевую матрицу
+     * @return нулевая матрица
      */
-    public Matrix3(boolean zero) {
-        matrix = new float[SIZE * SIZE];
-        if (zero) {
-            setZero();
-        } else {
-            setIdentity();
-        }
+    public static Matrix3 zero() {
+        Matrix3 m = new Matrix3();
+        m.setZero();
+        return m;
+    }
+
+    /**
+     * Создает единичную матрицу
+     * @return единичная матрица
+     */
+    public static Matrix3 identity() {
+        return new Matrix3();
     }
 
     /**
      * Создает матрицу из двумерного массива
+     * @param m двумерный массив 3×3
      */
     public Matrix3(float[][] m) {
         if (m == null || m.length != SIZE) {
-            throw new IllegalArgumentException("Matrix must be 3x3");
+            throw new IllegalArgumentException("Матрица должна быть 3x3");
         }
         for (int i = 0; i < SIZE; i++) {
             if (m[i] == null || m[i].length != SIZE) {
-                throw new IllegalArgumentException("Matrix must be 3x3");
+                throw new IllegalArgumentException("Матрица должна быть 3x3");
             }
         }
         matrix = new float[SIZE * SIZE];
@@ -48,11 +59,12 @@ public class Matrix3 {
     }
 
     /**
-     * Создает матрицу из одномерного массива (row-major order)
+     * Создает матрицу из одномерного массива
+     * @param m одномерный массив из 9 элементов
      */
     public Matrix3(float[] m) {
         if (m == null || m.length != SIZE * SIZE) {
-            throw new IllegalArgumentException("Matrix must be 3x3 (9 elements)");
+            throw new IllegalArgumentException("Массив должен содержать 9 элементов");
         }
         matrix = new float[SIZE * SIZE];
         System.arraycopy(m, 0, matrix, 0, SIZE * SIZE);
@@ -60,11 +72,10 @@ public class Matrix3 {
 
     /**
      * Создает копию матрицы
+     * @param other исходная матрица
      */
     public Matrix3(Matrix3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Matrix cannot be null");
-        }
+        requireNonNull(other, "Matrix");
         matrix = new float[SIZE * SIZE];
         System.arraycopy(other.matrix, 0, matrix, 0, SIZE * SIZE);
     }
@@ -73,10 +84,9 @@ public class Matrix3 {
      * Устанавливает единичную матрицу
      */
     public void setIdentity() {
+        setZero();
         for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                matrix[i * SIZE + j] = (i == j) ? 1.0f : 0.0f;
-            }
+            matrix[i * SIZE + i] = 1.0f;
         }
     }
 
@@ -84,39 +94,59 @@ public class Matrix3 {
      * Устанавливает нулевую матрицу
      */
     public void setZero() {
-        for (int i = 0; i < SIZE * SIZE; i++) {
-            matrix[i] = 0.0f;
+        Arrays.fill(matrix, 0.0f);
+    }
+
+    private void validateIndices(int row, int col) {
+        if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
+            throw new IndexOutOfBoundsException(
+                String.format("Индекс вне границ: строка=%d, столбец=%d (размер матрицы: %dx%d)", 
+                    row, col, SIZE, SIZE));
         }
     }
 
     /**
      * Получить значение элемента матрицы
+     * @param row номер строки (0-2)
+     * @param col номер столбца (0-2)
+     * @return значение элемента
      */
     public float get(int row, int col) {
-        if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
-            throw new IndexOutOfBoundsException("Index out of bounds");
-        }
+        validateIndices(row, col);
         return matrix[row * SIZE + col];
     }
 
     /**
      * Установить значение элемента матрицы
+     * @param row номер строки (0-2)
+     * @param col номер столбца (0-2)
+     * @param value новое значение
      */
     public void set(int row, int col, float value) {
-        if (row < 0 || row >= SIZE || col < 0 || col >= SIZE) {
-            throw new IndexOutOfBoundsException("Index out of bounds");
-        }
+        validateIndices(row, col);
         matrix[row * SIZE + col] = value;
     }
 
+    private static void requireNonNull(Matrix3 matrix, String paramName) {
+        if (matrix == null) {
+            throw new IllegalArgumentException(paramName + " не может быть null");
+        }
+    }
+
+    private static void requireNonNull(Vector3 vector, String paramName) {
+        if (vector == null) {
+            throw new IllegalArgumentException(paramName + " не может быть null");
+        }
+    }
+
     /**
-     * Сложение матриц: this + other
+     * Сложение матриц
+     * @param other другая матрица
+     * @return новая матрица
      */
     public Matrix3 add(Matrix3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Matrix cannot be null");
-        }
-        Matrix3 result = new Matrix3(true);
+        requireNonNull(other, "Matrix");
+        Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] + other.matrix[i];
         }
@@ -124,13 +154,13 @@ public class Matrix3 {
     }
 
     /**
-     * Вычитание матриц: this - other
+     * Вычитание матриц
+     * @param other другая матрица
+     * @return новая матрица
      */
     public Matrix3 subtract(Matrix3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Matrix cannot be null");
-        }
-        Matrix3 result = new Matrix3(true);
+        requireNonNull(other, "Matrix");
+        Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] - other.matrix[i];
         }
@@ -138,13 +168,13 @@ public class Matrix3 {
     }
 
     /**
-     * Умножение матриц: this * other
+     * Умножение матриц
+     * @param other другая матрица
+     * @return новая матрица
      */
     public Matrix3 multiply(Matrix3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Matrix cannot be null");
-        }
-        Matrix3 result = new Matrix3(true);
+        requireNonNull(other, "Matrix");
+        Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
                 float sum = 0.0f;
@@ -158,33 +188,54 @@ public class Matrix3 {
     }
 
     /**
-     * Умножение матрицы на вектор-столбец: this * vector
+     * Умножение матрицы на вектор
+     * @param vector вектор
+     * @return новый вектор
      */
     public Vector3 multiply(Vector3 vector) {
-        if (vector == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
+        requireNonNull(vector, "Vector");
+        float[] result = new float[SIZE];
+        for (int i = 0; i < SIZE; i++) {
+            float sum = 0.0f;
+            for (int j = 0; j < SIZE; j++) {
+                sum += matrix[i * SIZE + j] * getVectorComponent(vector, j);
+            }
+            result[i] = sum;
         }
-        float x = matrix[0 * SIZE + 0] * vector.getX() + matrix[0 * SIZE + 1] * vector.getY() + matrix[0 * SIZE + 2] * vector.getZ();
-        float y = matrix[1 * SIZE + 0] * vector.getX() + matrix[1 * SIZE + 1] * vector.getY() + matrix[1 * SIZE + 2] * vector.getZ();
-        float z = matrix[2 * SIZE + 0] * vector.getX() + matrix[2 * SIZE + 1] * vector.getY() + matrix[2 * SIZE + 2] * vector.getZ();
-        return new Vector3(x, y, z);
+        return new Vector3(result[0], result[1], result[2]);
+    }
+
+    private float getVectorComponent(Vector3 vector, int index) {
+        return switch (index) {
+            case 0 -> vector.getX();
+            case 1 -> vector.getY();
+            case 2 -> vector.getZ();
+            default -> throw new IllegalArgumentException("Неверный индекс компоненты вектора: " + index);
+        };
     }
 
     /**
-     * Транспонирование матрицы (возвращает новую транспонированную матрицу)
+     * Транспонирование матрицы
+     * @return новая транспонированная матрица
      */
     public Matrix3 transpose() {
-        Matrix3 result = new Matrix3(true);
+        Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
+            result.matrix[i * SIZE + i] = this.matrix[i * SIZE + i];
+        }
+        for (int i = 0; i < SIZE; i++) {
+            for (int j = i + 1; j < SIZE; j++) {
+                float temp = this.matrix[i * SIZE + j];
                 result.matrix[i * SIZE + j] = this.matrix[j * SIZE + i];
+                result.matrix[j * SIZE + i] = temp;
             }
         }
         return result;
     }
 
     /**
-     * Вычисление определителя матрицы
+     * Вычисление определителя
+     * @return определитель матрицы
      */
     public float determinant() {
         float a = matrix[0 * SIZE + 0], b = matrix[0 * SIZE + 1], c = matrix[0 * SIZE + 2];
@@ -194,37 +245,39 @@ public class Matrix3 {
         return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
     }
 
-    /**
-     * Получить копию матрицы в виде одномерного массива (row-major order)
-     */
-    public float[] toArray() {
-        float[] result = new float[SIZE * SIZE];
-        System.arraycopy(matrix, 0, result, 0, SIZE * SIZE);
-        return result;
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        Matrix3 matrix3 = (Matrix3) obj;
+        for (int i = 0; i < SIZE * SIZE; i++) {
+            if (Math.abs(this.matrix[i] - matrix3.matrix[i]) >= EPSILON) {
+                return false;
+            }
+        }
+        return true;
     }
 
-    /**
-     * Получить копию матрицы в виде двумерного массива
-     */
-    public float[][] to2DArray() {
-        float[][] result = new float[SIZE][SIZE];
-        for (int i = 0; i < SIZE; i++) {
-            for (int j = 0; j < SIZE; j++) {
-                result[i][j] = matrix[i * SIZE + j];
-            }
+    @Override
+    public int hashCode() {
+        float scale = 1.0f / EPSILON;
+        float maxValue = Integer.MAX_VALUE / scale;
+        int result = 1;
+        for (int i = 0; i < SIZE * SIZE; i++) {
+            float safeValue = Math.max(-maxValue, Math.min(maxValue, matrix[i]));
+            result = 31 * result + Integer.hashCode(Math.round(safeValue * scale));
         }
         return result;
     }
 
     @Override
     public String toString() {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Matrix3:\n");
+        StringBuilder sb = new StringBuilder("Matrix3:\n");
         for (int i = 0; i < SIZE; i++) {
             sb.append("[");
             for (int j = 0; j < SIZE; j++) {
+                if (j > 0) sb.append(", ");
                 sb.append(String.format("%.3f", matrix[i * SIZE + j]));
-                if (j < SIZE - 1) sb.append(", ");
             }
             sb.append("]\n");
         }

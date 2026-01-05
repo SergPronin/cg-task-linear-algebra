@@ -4,6 +4,8 @@ package ru.vsu.cs.pronin_s_v.math;
  * Класс для работы с трехмерными векторами
  */
 public class Vector3 {
+    private static final float EPSILON = 1e-7f;
+    
     private float x;
     private float y;
     private float z;
@@ -17,6 +19,9 @@ public class Vector3 {
 
     /**
      * Создает вектор с заданными координатами
+     * @param x координата x
+     * @param y координата y
+     * @param z координата z
      */
     public Vector3(float x, float y, float z) {
         this.x = x;
@@ -24,147 +29,129 @@ public class Vector3 {
         this.z = z;
     }
 
+    private static void requireNonNull(Vector3 vector, String paramName) {
+        if (vector == null) {
+            throw new IllegalArgumentException(paramName + " не может быть null");
+        }
+    }
+
     /**
      * Создает копию вектора
+     * @param other исходный вектор
      */
     public Vector3(Vector3 other) {
+        requireNonNull(other, "Vector");
         this.x = other.x;
         this.y = other.y;
         this.z = other.z;
     }
 
+    /**
+     * Возвращает координату x
+     * @return координата x
+     */
     public float getX() {
         return x;
     }
 
+    /**
+     * Возвращает координату y
+     * @return координата y
+     */
     public float getY() {
         return y;
     }
 
+    /**
+     * Возвращает координату z
+     * @return координата z
+     */
     public float getZ() {
         return z;
     }
 
-    public void setX(float x) {
-        this.x = x;
-    }
-
-    public void setY(float y) {
-        this.y = y;
-    }
-
-    public void setZ(float z) {
-        this.z = z;
-    }
-
     /**
-     * Устанавливает все координаты вектора
-     */
-    public void set(float x, float y, float z) {
-        this.x = x;
-        this.y = y;
-        this.z = z;
-    }
-
-    /**
-     * Получить координаты вектора в виде массива [x, y, z]
-     */
-    public float[] toArray() {
-        return new float[]{x, y, z};
-    }
-
-    /**
-     * Сложение векторов: this + other
+     * Сложение векторов
+     * @param other другой вектор
+     * @return новый вектор
      */
     public Vector3 add(Vector3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return new Vector3(this.x + other.x, this.y + other.y, this.z + other.z);
     }
 
     /**
-     * Вычитание векторов: this - other
+     * Вычитание векторов
+     * @param other другой вектор
+     * @return новый вектор
      */
     public Vector3 subtract(Vector3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return new Vector3(this.x - other.x, this.y - other.y, this.z - other.z);
     }
 
     /**
      * Умножение на скаляр
+     * @param scalar скалярное значение
+     * @return новый вектор
      */
     public Vector3 multiply(float scalar) {
         return new Vector3(this.x * scalar, this.y * scalar, this.z * scalar);
     }
 
+    private static void checkNonZero(float scalar) {
+        if (Math.abs(scalar) < EPSILON) {
+            throw new ArithmeticException("Деление на ноль");
+        }
+    }
+
     /**
      * Деление на скаляр
+     * @param scalar скалярное значение
+     * @return новый вектор
      */
     public Vector3 divide(float scalar) {
-        if (Math.abs(scalar) < 1e-7f) {
-            throw new ArithmeticException("Division by zero");
-        }
+        checkNonZero(scalar);
         return new Vector3(this.x / scalar, this.y / scalar, this.z / scalar);
     }
 
     /**
      * Вычисление длины вектора
+     * @return длина вектора
      */
     public float length() {
         return (float) Math.sqrt(x * x + y * y + z * z);
     }
 
     /**
-     * Вычисление квадрата длины вектора
-     */
-    public float lengthSquared() {
-        return x * x + y * y + z * z;
-    }
-
-    /**
-     * Нормализация вектора (возвращает новый нормализованный вектор)
+     * Нормализация вектора
+     * @return новый нормализованный вектор
      */
     public Vector3 normalize() {
         float len = length();
-        if (len < 1e-7f) {
-            throw new ArithmeticException("Cannot normalize zero vector");
+        if (len < EPSILON) {
+            throw new ArithmeticException("Невозможно нормализовать нулевой вектор");
         }
         return new Vector3(this.x / len, this.y / len, this.z / len);
     }
 
     /**
-     * Нормализация вектора на месте
-     */
-    public void normalizeInPlace() {
-        float len = length();
-        if (len < 1e-7f) {
-            throw new ArithmeticException("Cannot normalize zero vector");
-        }
-        this.x /= len;
-        this.y /= len;
-        this.z /= len;
-    }
-
-    /**
-     * Скалярное произведение: this · other
+     * Скалярное произведение
+     * @param other другой вектор
+     * @return скалярное произведение
      */
     public float dot(Vector3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return this.x * other.x + this.y * other.y + this.z * other.z;
     }
 
     /**
-     * Векторное произведение: this × other
+     * Векторное произведение
+     * @param other другой вектор
+     * @return новый вектор
      */
     public Vector3 cross(Vector3 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return new Vector3(
             this.y * other.z - this.z * other.y,
             this.z * other.x - this.x * other.z,
@@ -172,30 +159,26 @@ public class Vector3 {
         );
     }
 
-    /**
-     * Проверка на равенство с учетом погрешности
-     */
-    public boolean equals(Vector3 other, float epsilon) {
-        if (other == null) {
-            return false;
-        }
-        return Math.abs(this.x - other.x) < epsilon 
-            && Math.abs(this.y - other.y) < epsilon 
-            && Math.abs(this.z - other.z) < epsilon;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Vector3 vector3 = (Vector3) obj;
-        final float eps = 1e-7f;
-        return equals(vector3, eps);
+        return Math.abs(this.x - vector3.x) < EPSILON 
+            && Math.abs(this.y - vector3.y) < EPSILON 
+            && Math.abs(this.z - vector3.z) < EPSILON;
     }
 
     @Override
     public int hashCode() {
-        return Float.hashCode(x) * 31 * 31 + Float.hashCode(y) * 31 + Float.hashCode(z);
+        float scale = 1.0f / EPSILON;
+        float maxValue = Integer.MAX_VALUE / scale;
+        float safeX = Math.max(-maxValue, Math.min(maxValue, x));
+        float safeY = Math.max(-maxValue, Math.min(maxValue, y));
+        float safeZ = Math.max(-maxValue, Math.min(maxValue, z));
+        return Integer.hashCode(Math.round(safeX * scale)) * 31 * 31 
+             + Integer.hashCode(Math.round(safeY * scale)) * 31 
+             + Integer.hashCode(Math.round(safeZ * scale));
     }
 
     @Override

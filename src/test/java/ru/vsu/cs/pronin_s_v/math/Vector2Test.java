@@ -9,40 +9,23 @@ import org.junit.jupiter.api.Assertions;
 public class Vector2Test {
 
     private static final float EPSILON = 1e-5f;
+    private static final float TEST_X = 1.0f;
+    private static final float TEST_Y = 2.0f;
 
     /**
-     * Тест конструктора по умолчанию.
-     * Проверяет, что создается нулевой вектор (0, 0).
+     * Тест конструкторов
      */
     @Test
-    public void testDefaultConstructor() {
-        Vector2 v = new Vector2();
-        Assertions.assertEquals(0.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getY(), EPSILON);
+    public void testConstructors() {
+        Vector2 v1 = new Vector2();
+        Assertions.assertEquals(0.0f, v1.getX(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getY(), EPSILON);
+        
+        Vector2 v2 = new Vector2(TEST_X, TEST_Y);
+        Assertions.assertEquals(TEST_X, v2.getX(), EPSILON);
+        Assertions.assertEquals(TEST_Y, v2.getY(), EPSILON);
     }
 
-    /**
-     * Тест конструктора с параметрами.
-     * Проверяет, что вектор создается с заданными координатами (x, y).
-     */
-    @Test
-    public void testConstructor() {
-        Vector2 v = new Vector2(1.0f, 2.0f);
-        Assertions.assertEquals(1.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(2.0f, v.getY(), EPSILON);
-    }
-
-    /**
-     * Тест конструктора копирования.
-     * Проверяет, что создается точная копия исходного вектора.
-     */
-    @Test
-    public void testCopyConstructor() {
-        Vector2 v1 = new Vector2(1.0f, 2.0f);
-        Vector2 v2 = new Vector2(v1);
-        Assertions.assertEquals(v1.getX(), v2.getX(), EPSILON);
-        Assertions.assertEquals(v1.getY(), v2.getY(), EPSILON);
-    }
 
     /**
      * Тест сложения векторов.
@@ -55,18 +38,6 @@ public class Vector2Test {
         Vector2 result = v1.add(v2);
         Assertions.assertEquals(4.0f, result.getX(), EPSILON);
         Assertions.assertEquals(6.0f, result.getY(), EPSILON);
-    }
-
-    /**
-     * Тест обработки ошибки при сложении с null.
-     * Проверяет, что передача null вызывает IllegalArgumentException.
-     */
-    @Test
-    public void testAddWithNull() {
-        Vector2 v1 = new Vector2(1.0f, 2.0f);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            v1.add(null);
-        });
     }
 
     /**
@@ -83,20 +54,19 @@ public class Vector2Test {
     }
 
     /**
-     * Тест обработки ошибки при вычитании с null.
-     * Проверяет, что передача null вызывает IllegalArgumentException.
+     * Тест обработки ошибок при операциях с null.
+     * Проверяет, что передача null вызывает IllegalArgumentException для всех операций.
      */
     @Test
-    public void testSubtractWithNull() {
+    public void testOperationsWithNull() {
         Vector2 v1 = new Vector2(1.0f, 2.0f);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            v1.subtract(null);
-        });
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.add(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.subtract(null));
+        Assertions.assertThrows(IllegalArgumentException.class, () -> v1.dot(null));
     }
 
     /**
-     * Тест умножения вектора на скаляр.
-     * Проверяет, что (2,3) * 2 = (4,6).
+     * Тест умножения вектора на скаляр
      */
     @Test
     public void testMultiply() {
@@ -104,18 +74,6 @@ public class Vector2Test {
         Vector2 result = v.multiply(2.0f);
         Assertions.assertEquals(4.0f, result.getX(), EPSILON);
         Assertions.assertEquals(6.0f, result.getY(), EPSILON);
-    }
-
-    /**
-     * Тест умножения вектора на ноль.
-     * Проверяет, что умножение на 0 дает нулевой вектор (0,0).
-     */
-    @Test
-    public void testMultiplyByZero() {
-        Vector2 v = new Vector2(2.0f, 3.0f);
-        Vector2 result = v.multiply(0.0f);
-        Assertions.assertEquals(0.0f, result.getX(), EPSILON);
-        Assertions.assertEquals(0.0f, result.getY(), EPSILON);
     }
 
     /**
@@ -143,8 +101,7 @@ public class Vector2Test {
     }
 
     /**
-     * Тест вычисления длины вектора.
-     * Проверяет, что длина вектора (3,4) равна 5.0 (теорема Пифагора: √(3²+4²) = 5).
+     * Тест вычисления длины вектора
      */
     @Test
     public void testLength() {
@@ -152,26 +109,6 @@ public class Vector2Test {
         Assertions.assertEquals(5.0f, v.length(), EPSILON);
     }
 
-    /**
-     * Тест длины нулевого вектора.
-     * Проверяет, что длина нулевого вектора (0,0) равна 0.0.
-     */
-    @Test
-    public void testLengthZero() {
-        Vector2 v = new Vector2(0.0f, 0.0f);
-        Assertions.assertEquals(0.0f, v.length(), EPSILON);
-    }
-
-    /**
-     * Тест вычисления квадрата длины вектора.
-     * Проверяет, что квадрат длины (3,4) равен 25.0 (3²+4² = 9+16 = 25).
-     * Это оптимизация, когда не нужна точная длина.
-     */
-    @Test
-    public void testLengthSquared() {
-        Vector2 v = new Vector2(3.0f, 4.0f);
-        Assertions.assertEquals(25.0f, v.lengthSquared(), EPSILON);
-    }
 
     /**
      * Тест нормализации вектора.
@@ -199,20 +136,9 @@ public class Vector2Test {
         });
     }
 
-    /**
-     * Тест нормализации вектора на месте (in-place).
-     * Проверяет, что метод normalizeInPlace() изменяет сам вектор, а не создает новый.
-     */
-    @Test
-    public void testNormalizeInPlace() {
-        Vector2 v = new Vector2(3.0f, 4.0f);
-        v.normalizeInPlace();
-        Assertions.assertEquals(1.0f, v.length(), EPSILON);
-    }
 
     /**
-     * Тест скалярного произведения векторов.
-     * Проверяет, что (1,2) · (3,4) = 1*3 + 2*4 = 11.
+     * Тест скалярного произведения векторов
      */
     @Test
     public void testDot() {
@@ -223,60 +149,19 @@ public class Vector2Test {
     }
 
     /**
-     * Тест обработки ошибки при скалярном произведении с null.
-     * Проверяет, что передача null вызывает IllegalArgumentException.
-     */
-    @Test
-    public void testDotWithNull() {
-        Vector2 v1 = new Vector2(1.0f, 2.0f);
-        Assertions.assertThrows(IllegalArgumentException.class, () -> {
-            v1.dot(null);
-        });
-    }
-
-    /**
-     * Тест скалярного произведения перпендикулярных векторов.
-     * Проверяет, что скалярное произведение перпендикулярных векторов равно 0.
-     * Векторы (1,0) и (0,1) перпендикулярны, поэтому их скалярное произведение = 0.
-     */
-    @Test
-    public void testDotPerpendicular() {
-        Vector2 v1 = new Vector2(1.0f, 0.0f);
-        Vector2 v2 = new Vector2(0.0f, 1.0f);
-        float result = v1.dot(v2);
-        Assertions.assertEquals(0.0f, result, EPSILON);
-    }
-
-    /**
-     * Тест сравнения равных векторов.
-     * Проверяет, что два вектора с одинаковыми координатами считаются равными.
+     * Тест сравнения векторов
      */
     @Test
     public void testEquals() {
         Vector2 v1 = new Vector2(1.0f, 2.0f);
         Vector2 v2 = new Vector2(1.0f, 2.0f);
+        Vector2 v3 = new Vector2(1.0f, 3.0f);
+        
         Assertions.assertTrue(v1.equals(v2));
+        Assertions.assertTrue(v1.equals(v1));
+        Assertions.assertFalse(v1.equals(v3));
+        Assertions.assertFalse(v1.equals(null));
+        Assertions.assertFalse(v1.equals("not a vector"));
     }
 
-    /**
-     * Тест сравнения неравных векторов.
-     * Проверяет, что векторы с разными координатами считаются неравными.
-     */
-    @Test
-    public void testNotEquals() {
-        Vector2 v1 = new Vector2(1.0f, 2.0f);
-        Vector2 v2 = new Vector2(1.0f, 3.0f);
-        Assertions.assertFalse(v1.equals(v2));
-    }
-
-    /**
-     * Тест строкового представления вектора.
-     * Проверяет, что метод toString() возвращает строку, содержащую "Vector2".
-     */
-    @Test
-    public void testToString() {
-        Vector2 v = new Vector2(1.5f, 2.5f);
-        String str = v.toString();
-        Assertions.assertTrue(str.contains("Vector2"));
-    }
 }

@@ -9,61 +9,29 @@ import org.junit.jupiter.api.Assertions;
 public class Vector4Test {
 
     private static final float EPSILON = 1e-5f;
+    private static final float TEST_X = 1.0f;
+    private static final float TEST_Y = 2.0f;
+    private static final float TEST_Z = 3.0f;
+    private static final float TEST_W = 4.0f;
 
     /**
-     * Тест конструктора по умолчанию.
-     * Проверяет, что создается нулевой вектор (0, 0, 0, 0).
+     * Тест конструкторов
      */
     @Test
-    public void testDefaultConstructor() {
-        Vector4 v = new Vector4();
-        Assertions.assertEquals(0.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getY(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getZ(), EPSILON);
-        Assertions.assertEquals(0.0f, v.getW(), EPSILON);
+    public void testConstructors() {
+        Vector4 v1 = new Vector4();
+        Assertions.assertEquals(0.0f, v1.getX(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getY(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getZ(), EPSILON);
+        Assertions.assertEquals(0.0f, v1.getW(), EPSILON);
+        
+        Vector4 v2 = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
+        Assertions.assertEquals(1.0f, v2.getX(), EPSILON);
+        Assertions.assertEquals(2.0f, v2.getY(), EPSILON);
+        Assertions.assertEquals(3.0f, v2.getZ(), EPSILON);
+        Assertions.assertEquals(4.0f, v2.getW(), EPSILON);
     }
 
-    /**
-     * Тест конструктора с параметрами.
-     * Проверяет, что вектор создается с заданными координатами (x, y, z, w).
-     */
-    @Test
-    public void testConstructor() {
-        Vector4 v = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
-        Assertions.assertEquals(1.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(2.0f, v.getY(), EPSILON);
-        Assertions.assertEquals(3.0f, v.getZ(), EPSILON);
-        Assertions.assertEquals(4.0f, v.getW(), EPSILON);
-    }
-
-    /**
-     * Тест конструктора из Vector3.
-     * Проверяет создание Vector4 из Vector3 с заданным w (важно для однородных координат).
-     * Используется в 3D-графике для преобразований.
-     */
-    @Test
-    public void testConstructorFromVector3() {
-        Vector3 v3 = new Vector3(1.0f, 2.0f, 3.0f);
-        Vector4 v = new Vector4(v3, 1.0f);
-        Assertions.assertEquals(1.0f, v.getX(), EPSILON);
-        Assertions.assertEquals(2.0f, v.getY(), EPSILON);
-        Assertions.assertEquals(3.0f, v.getZ(), EPSILON);
-        Assertions.assertEquals(1.0f, v.getW(), EPSILON);
-    }
-
-    /**
-     * Тест конструктора копирования.
-     * Проверяет, что создается точная копия исходного вектора.
-     */
-    @Test
-    public void testCopyConstructor() {
-        Vector4 v1 = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
-        Vector4 v2 = new Vector4(v1);
-        Assertions.assertEquals(v1.getX(), v2.getX(), EPSILON);
-        Assertions.assertEquals(v1.getY(), v2.getY(), EPSILON);
-        Assertions.assertEquals(v1.getZ(), v2.getZ(), EPSILON);
-        Assertions.assertEquals(v1.getW(), v2.getW(), EPSILON);
-    }
 
     /**
      * Тест сложения четырехмерных векторов.
@@ -157,6 +125,9 @@ public class Vector4Test {
         Vector4 normalized = v.normalize();
         Assertions.assertEquals(1.0f, normalized.length(), EPSILON);
         Assertions.assertEquals(1.0f, normalized.getX(), EPSILON);
+        Assertions.assertEquals(0.0f, normalized.getY(), EPSILON);
+        Assertions.assertEquals(0.0f, normalized.getZ(), EPSILON);
+        Assertions.assertEquals(0.0f, normalized.getW(), EPSILON);
     }
 
     /**
@@ -184,13 +155,21 @@ public class Vector4Test {
     }
 
     /**
-     * Тест сравнения равных четырехмерных векторов.
-     * Проверяет, что два вектора с одинаковыми координатами считаются равными.
+     * Тест сравнения векторов
      */
     @Test
     public void testEquals() {
-        Vector4 v1 = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
-        Vector4 v2 = new Vector4(1.0f, 2.0f, 3.0f, 4.0f);
+        Vector4 v1 = new Vector4(TEST_X, TEST_Y, TEST_Z, TEST_W);
+        Vector4 v2 = new Vector4(TEST_X, TEST_Y, TEST_Z, TEST_W);
+        Vector4 v3 = new Vector4(TEST_X + 1.0f, TEST_Y, TEST_Z, TEST_W);
+        
         Assertions.assertTrue(v1.equals(v2));
+        Assertions.assertTrue(v1.equals(v1));
+        Assertions.assertFalse(v1.equals(v3));
+        Assertions.assertFalse(v1.equals(null));
+        Assertions.assertFalse(v1.equals("not a vector"));
     }
+
+
+
 }

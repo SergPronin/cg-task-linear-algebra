@@ -4,6 +4,8 @@ package ru.vsu.cs.pronin_s_v.math;
  * Класс для работы с двумерными векторами
  */
 public class Vector2 {
+    private static final float EPSILON = 1e-7f;
+    
     private float x;
     private float y;
 
@@ -16,6 +18,8 @@ public class Vector2 {
 
     /**
      * Создает вектор с заданными координатами
+     * @param x координата x
+     * @param y координата y
      */
     public Vector2(float x, float y) {
         this.x = x;
@@ -24,149 +28,130 @@ public class Vector2 {
 
     /**
      * Создает копию вектора
+     * @param other исходный вектор
      */
     public Vector2(Vector2 other) {
+        requireNonNull(other, "Vector");
         this.x = other.x;
         this.y = other.y;
     }
 
+    /**
+     * Возвращает координату x
+     * @return координата x
+     */
     public float getX() {
         return x;
     }
 
+    /**
+     * Возвращает координату y
+     * @return координата y
+     */
     public float getY() {
         return y;
     }
 
-    public void setX(float x) {
-        this.x = x;
-    }
-
-    public void setY(float y) {
-        this.y = y;
-    }
-
-    /**
-     * Устанавливает все координаты вектора
-     */
-    public void set(float x, float y) {
-        this.x = x;
-        this.y = y;
+    private static void requireNonNull(Vector2 vector, String paramName) {
+        if (vector == null) {
+            throw new IllegalArgumentException(paramName + " не может быть null");
+        }
     }
 
     /**
-     * Получить координаты вектора в виде массива [x, y]
-     */
-    public float[] toArray() {
-        return new float[]{x, y};
-    }
-
-    /**
-     * Сложение векторов: this + other
+     * Сложение векторов
+     * @param other другой вектор
+     * @return новый вектор
      */
     public Vector2 add(Vector2 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return new Vector2(this.x + other.x, this.y + other.y);
     }
 
     /**
-     * Вычитание векторов: this - other
+     * Вычитание векторов
+     * @param other другой вектор
+     * @return новый вектор
      */
     public Vector2 subtract(Vector2 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return new Vector2(this.x - other.x, this.y - other.y);
     }
 
     /**
      * Умножение на скаляр
+     * @param scalar скалярное значение
+     * @return новый вектор
      */
     public Vector2 multiply(float scalar) {
         return new Vector2(this.x * scalar, this.y * scalar);
     }
 
+    private static void checkNonZero(float scalar) {
+        if (Math.abs(scalar) < EPSILON) {
+            throw new ArithmeticException("Деление на ноль");
+        }
+    }
+
     /**
      * Деление на скаляр
+     * @param scalar скалярное значение
+     * @return новый вектор
      */
     public Vector2 divide(float scalar) {
-        if (Math.abs(scalar) < 1e-7f) {
-            throw new ArithmeticException("Division by zero");
-        }
+        checkNonZero(scalar);
         return new Vector2(this.x / scalar, this.y / scalar);
     }
 
     /**
      * Вычисление длины вектора
+     * @return длина вектора
      */
     public float length() {
         return (float) Math.sqrt(x * x + y * y);
     }
 
     /**
-     * Вычисление квадрата длины вектора
-     */
-    public float lengthSquared() {
-        return x * x + y * y;
-    }
-
-    /**
-     * Нормализация вектора (возвращает новый нормализованный вектор)
+     * Нормализация вектора
+     * @return новый нормализованный вектор
      */
     public Vector2 normalize() {
         float len = length();
-        if (len < 1e-7f) {
-            throw new ArithmeticException("Cannot normalize zero vector");
+        if (len < EPSILON) {
+            throw new ArithmeticException("Невозможно нормализовать нулевой вектор");
         }
         return new Vector2(this.x / len, this.y / len);
     }
 
     /**
-     * Нормализация вектора на месте
-     */
-    public void normalizeInPlace() {
-        float len = length();
-        if (len < 1e-7f) {
-            throw new ArithmeticException("Cannot normalize zero vector");
-        }
-        this.x /= len;
-        this.y /= len;
-    }
-
-    /**
-     * Скалярное произведение: this · other
+     * Скалярное произведение
+     * @param other другой вектор
+     * @return скалярное произведение
      */
     public float dot(Vector2 other) {
-        if (other == null) {
-            throw new IllegalArgumentException("Vector cannot be null");
-        }
+        requireNonNull(other, "Vector");
         return this.x * other.x + this.y * other.y;
     }
 
     /**
-     * Проверка на равенство с учетом погрешности
+     * Сравнение векторов
      */
-    public boolean equals(Vector2 other, float epsilon) {
-        if (other == null) {
-            return false;
-        }
-        return Math.abs(this.x - other.x) < epsilon && Math.abs(this.y - other.y) < epsilon;
-    }
-
     @Override
     public boolean equals(Object obj) {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Vector2 vector2 = (Vector2) obj;
-        final float eps = 1e-7f;
-        return equals(vector2, eps);
+        return Math.abs(this.x - vector2.x) < EPSILON && Math.abs(this.y - vector2.y) < EPSILON;
     }
 
     @Override
     public int hashCode() {
-        return Float.hashCode(x) * 31 + Float.hashCode(y);
+        float scale = 1.0f / EPSILON;
+        float maxValue = Integer.MAX_VALUE / scale;
+        float safeX = Math.max(-maxValue, Math.min(maxValue, x));
+        float safeY = Math.max(-maxValue, Math.min(maxValue, y));
+        return Integer.hashCode(Math.round(safeX * scale)) * 31 
+             + Integer.hashCode(Math.round(safeY * scale));
     }
 
     @Override
