@@ -7,7 +7,6 @@ import java.util.Arrays;
  */
 public class Matrix4 {
     private static final int SIZE = 4;
-    private static final float EPSILON = 1e-7f;
     
     private final float[] matrix;
 
@@ -70,24 +69,12 @@ public class Matrix4 {
         System.arraycopy(m, 0, matrix, 0, SIZE * SIZE);
     }
 
-    private static void requireNonNull(Matrix4 matrix, String paramName) {
-        if (matrix == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
-    private static void requireNonNull(Vector4 vector, String paramName) {
-        if (vector == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
     /**
      * Создает копию матрицы
      * @param other исходная матрица
      */
     public Matrix4(Matrix4 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         matrix = new float[SIZE * SIZE];
         System.arraycopy(other.matrix, 0, matrix, 0, SIZE * SIZE);
     }
@@ -145,7 +132,7 @@ public class Matrix4 {
      * @return новая матрица
      */
     public Matrix4 add(Matrix4 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix4 result = Matrix4.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] + other.matrix[i];
@@ -159,7 +146,7 @@ public class Matrix4 {
      * @return новая матрица
      */
     public Matrix4 subtract(Matrix4 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix4 result = Matrix4.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] - other.matrix[i];
@@ -173,7 +160,7 @@ public class Matrix4 {
      * @return новая матрица
      */
     public Matrix4 multiply(Matrix4 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix4 result = Matrix4.zero();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -193,7 +180,7 @@ public class Matrix4 {
      * @return новый вектор
      */
     public Vector4 multiply(Vector4 vector) {
-        requireNonNull(vector, "Vector");
+        ValidationUtils.requireNonNull(vector, "Vector");
         float[] result = new float[SIZE];
         for (int i = 0; i < SIZE; i++) {
             float sum = 0.0f;
@@ -205,7 +192,7 @@ public class Matrix4 {
         return new Vector4(result[0], result[1], result[2], result[3]);
     }
 
-    private float getVectorComponent(Vector4 vector, int index) {
+    private static float getVectorComponent(Vector4 vector, int index) {
         return switch (index) {
             case 0 -> vector.getX();
             case 1 -> vector.getY();
@@ -264,19 +251,13 @@ public class Matrix4 {
         return a * (e * i - f * h) - b * (d * i - f * g) + c * (d * h - e * g);
     }
 
-    private static void checkNonZeroDeterminant(float det) {
-        if (Math.abs(det) < EPSILON) {
-            throw new ArithmeticException("Матрица вырожденная (определитель равен нулю), невозможно вычислить обратную матрицу");
-        }
-    }
-
     /**
      * Вычисление обратной матрицы
      * @return обратная матрица
      */
     public Matrix4 inverse() {
         float det = determinant();
-        checkNonZeroDeterminant(det);
+        ValidationUtils.checkNonZeroDeterminant(det);
         
         Matrix4 adjugate = Matrix4.zero();
         for (int i = 0; i < SIZE; i++) {
@@ -293,8 +274,9 @@ public class Matrix4 {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Matrix4 matrix4 = (Matrix4) obj;
+        float epsilon = ValidationUtils.getEpsilon();
         for (int i = 0; i < SIZE * SIZE; i++) {
-            if (Math.abs(this.matrix[i] - matrix4.matrix[i]) >= EPSILON) {
+            if (Math.abs(this.matrix[i] - matrix4.matrix[i]) >= epsilon) {
                 return false;
             }
         }
@@ -303,7 +285,8 @@ public class Matrix4 {
 
     @Override
     public int hashCode() {
-        float scale = 1.0f / EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        float scale = 1.0f / epsilon;
         float maxValue = Integer.MAX_VALUE / scale;
         int result = 1;
         for (int i = 0; i < SIZE * SIZE; i++) {

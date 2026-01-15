@@ -4,7 +4,6 @@ package ru.vsu.cs.pronin_s_v.math;
  * Класс для работы с двумерными векторами
  */
 public class Vector2 {
-    private static final float EPSILON = 1e-7f;
     
     private float x;
     private float y;
@@ -31,7 +30,7 @@ public class Vector2 {
      * @param other исходный вектор
      */
     public Vector2(Vector2 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         this.x = other.x;
         this.y = other.y;
     }
@@ -52,19 +51,13 @@ public class Vector2 {
         return y;
     }
 
-    private static void requireNonNull(Vector2 vector, String paramName) {
-        if (vector == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
     /**
      * Сложение векторов
      * @param other другой вектор
      * @return новый вектор
      */
     public Vector2 add(Vector2 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return new Vector2(this.x + other.x, this.y + other.y);
     }
 
@@ -74,7 +67,7 @@ public class Vector2 {
      * @return новый вектор
      */
     public Vector2 subtract(Vector2 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return new Vector2(this.x - other.x, this.y - other.y);
     }
 
@@ -87,19 +80,13 @@ public class Vector2 {
         return new Vector2(this.x * scalar, this.y * scalar);
     }
 
-    private static void checkNonZero(float scalar) {
-        if (Math.abs(scalar) < EPSILON) {
-            throw new ArithmeticException("Деление на ноль");
-        }
-    }
-
     /**
      * Деление на скаляр
      * @param scalar скалярное значение
      * @return новый вектор
      */
     public Vector2 divide(float scalar) {
-        checkNonZero(scalar);
+        ValidationUtils.checkNonZero(scalar);
         return new Vector2(this.x / scalar, this.y / scalar);
     }
 
@@ -117,9 +104,7 @@ public class Vector2 {
      */
     public Vector2 normalize() {
         float len = length();
-        if (len < EPSILON) {
-            throw new ArithmeticException("Невозможно нормализовать нулевой вектор");
-        }
+        ValidationUtils.checkNonZeroLength(len);
         return new Vector2(this.x / len, this.y / len);
     }
 
@@ -129,7 +114,7 @@ public class Vector2 {
      * @return скалярное произведение
      */
     public float dot(Vector2 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return this.x * other.x + this.y * other.y;
     }
 
@@ -141,12 +126,14 @@ public class Vector2 {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Vector2 vector2 = (Vector2) obj;
-        return Math.abs(this.x - vector2.x) < EPSILON && Math.abs(this.y - vector2.y) < EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        return Math.abs(this.x - vector2.x) < epsilon && Math.abs(this.y - vector2.y) < epsilon;
     }
 
     @Override
     public int hashCode() {
-        float scale = 1.0f / EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        float scale = 1.0f / epsilon;
         float maxValue = Integer.MAX_VALUE / scale;
         float safeX = Math.max(-maxValue, Math.min(maxValue, x));
         float safeY = Math.max(-maxValue, Math.min(maxValue, y));

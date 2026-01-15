@@ -7,7 +7,6 @@ import java.util.Arrays;
  */
 public class Matrix3 {
     private static final int SIZE = 3;
-    private static final float EPSILON = 1e-7f;
     
     private final float[] matrix;
 
@@ -75,7 +74,7 @@ public class Matrix3 {
      * @param other исходная матрица
      */
     public Matrix3(Matrix3 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         matrix = new float[SIZE * SIZE];
         System.arraycopy(other.matrix, 0, matrix, 0, SIZE * SIZE);
     }
@@ -127,17 +126,6 @@ public class Matrix3 {
         matrix[row * SIZE + col] = value;
     }
 
-    private static void requireNonNull(Matrix3 matrix, String paramName) {
-        if (matrix == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
-    private static void requireNonNull(Vector3 vector, String paramName) {
-        if (vector == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
 
     /**
      * Сложение матриц
@@ -145,7 +133,7 @@ public class Matrix3 {
      * @return новая матрица
      */
     public Matrix3 add(Matrix3 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] + other.matrix[i];
@@ -159,7 +147,7 @@ public class Matrix3 {
      * @return новая матрица
      */
     public Matrix3 subtract(Matrix3 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE * SIZE; i++) {
             result.matrix[i] = this.matrix[i] - other.matrix[i];
@@ -173,7 +161,7 @@ public class Matrix3 {
      * @return новая матрица
      */
     public Matrix3 multiply(Matrix3 other) {
-        requireNonNull(other, "Matrix");
+        ValidationUtils.requireNonNull(other, "Matrix");
         Matrix3 result = Matrix3.zero();
         for (int i = 0; i < SIZE; i++) {
             for (int j = 0; j < SIZE; j++) {
@@ -193,7 +181,7 @@ public class Matrix3 {
      * @return новый вектор
      */
     public Vector3 multiply(Vector3 vector) {
-        requireNonNull(vector, "Vector");
+        ValidationUtils.requireNonNull(vector, "Vector");
         float[] result = new float[SIZE];
         for (int i = 0; i < SIZE; i++) {
             float sum = 0.0f;
@@ -205,7 +193,7 @@ public class Matrix3 {
         return new Vector3(result[0], result[1], result[2]);
     }
 
-    private float getVectorComponent(Vector3 vector, int index) {
+    private static float getVectorComponent(Vector3 vector, int index) {
         return switch (index) {
             case 0 -> vector.getX();
             case 1 -> vector.getY();
@@ -250,8 +238,9 @@ public class Matrix3 {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Matrix3 matrix3 = (Matrix3) obj;
+        float epsilon = ValidationUtils.getEpsilon();
         for (int i = 0; i < SIZE * SIZE; i++) {
-            if (Math.abs(this.matrix[i] - matrix3.matrix[i]) >= EPSILON) {
+            if (Math.abs(this.matrix[i] - matrix3.matrix[i]) >= epsilon) {
                 return false;
             }
         }
@@ -260,7 +249,8 @@ public class Matrix3 {
 
     @Override
     public int hashCode() {
-        float scale = 1.0f / EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        float scale = 1.0f / epsilon;
         float maxValue = Integer.MAX_VALUE / scale;
         int result = 1;
         for (int i = 0; i < SIZE * SIZE; i++) {

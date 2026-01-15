@@ -4,7 +4,6 @@ package ru.vsu.cs.pronin_s_v.math;
  * Класс для работы с четырехмерными векторами
  */
 public class Vector4 {
-    private static final float EPSILON = 1e-7f;
     
     private float x;
     private float y;
@@ -32,25 +31,13 @@ public class Vector4 {
         this.w = w;
     }
 
-    private static void requireNonNull(Vector4 vector, String paramName) {
-        if (vector == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
-    private static void requireNonNull(Vector3 vector, String paramName) {
-        if (vector == null) {
-            throw new IllegalArgumentException(paramName + " не может быть null");
-        }
-    }
-
     /**
      * Создает вектор из Vector3 с заданным w
      * @param v трехмерный вектор
      * @param w координата w
      */
     public Vector4(Vector3 v, float w) {
-        requireNonNull(v, "Vector3");
+        ValidationUtils.requireNonNull(v, "Vector3");
         this.x = v.getX();
         this.y = v.getY();
         this.z = v.getZ();
@@ -62,7 +49,7 @@ public class Vector4 {
      * @param other исходный вектор
      */
     public Vector4(Vector4 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         this.x = other.x;
         this.y = other.y;
         this.z = other.z;
@@ -107,7 +94,7 @@ public class Vector4 {
      * @return новый вектор
      */
     public Vector4 add(Vector4 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return new Vector4(this.x + other.x, this.y + other.y, this.z + other.z, this.w + other.w);
     }
 
@@ -117,7 +104,7 @@ public class Vector4 {
      * @return новый вектор
      */
     public Vector4 subtract(Vector4 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return new Vector4(this.x - other.x, this.y - other.y, this.z - other.z, this.w - other.w);
     }
 
@@ -130,19 +117,13 @@ public class Vector4 {
         return new Vector4(this.x * scalar, this.y * scalar, this.z * scalar, this.w * scalar);
     }
 
-    private static void checkNonZero(float scalar) {
-        if (Math.abs(scalar) < EPSILON) {
-            throw new ArithmeticException("Деление на ноль");
-        }
-    }
-
     /**
      * Деление на скаляр
      * @param scalar скалярное значение
      * @return новый вектор
      */
     public Vector4 divide(float scalar) {
-        checkNonZero(scalar);
+        ValidationUtils.checkNonZero(scalar);
         return new Vector4(this.x / scalar, this.y / scalar, this.z / scalar, this.w / scalar);
     }
 
@@ -160,9 +141,7 @@ public class Vector4 {
      */
     public Vector4 normalize() {
         float len = length();
-        if (len < EPSILON) {
-            throw new ArithmeticException("Невозможно нормализовать нулевой вектор");
-        }
+        ValidationUtils.checkNonZeroLength(len);
         return new Vector4(this.x / len, this.y / len, this.z / len, this.w / len);
     }
 
@@ -172,7 +151,7 @@ public class Vector4 {
      * @return скалярное произведение
      */
     public float dot(Vector4 other) {
-        requireNonNull(other, "Vector");
+        ValidationUtils.requireNonNull(other, "Vector");
         return this.x * other.x + this.y * other.y + this.z * other.z + this.w * other.w;
     }
 
@@ -181,15 +160,17 @@ public class Vector4 {
         if (this == obj) return true;
         if (obj == null || getClass() != obj.getClass()) return false;
         Vector4 vector4 = (Vector4) obj;
-        return Math.abs(this.x - vector4.x) < EPSILON 
-            && Math.abs(this.y - vector4.y) < EPSILON 
-            && Math.abs(this.z - vector4.z) < EPSILON
-            && Math.abs(this.w - vector4.w) < EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        return Math.abs(this.x - vector4.x) < epsilon 
+            && Math.abs(this.y - vector4.y) < epsilon 
+            && Math.abs(this.z - vector4.z) < epsilon
+            && Math.abs(this.w - vector4.w) < epsilon;
     }
 
     @Override
     public int hashCode() {
-        float scale = 1.0f / EPSILON;
+        float epsilon = ValidationUtils.getEpsilon();
+        float scale = 1.0f / epsilon;
         float maxValue = Integer.MAX_VALUE / scale;
         float safeX = Math.max(-maxValue, Math.min(maxValue, x));
         float safeY = Math.max(-maxValue, Math.min(maxValue, y));
