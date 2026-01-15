@@ -167,9 +167,32 @@ public class Matrix4Test {
     }
 
     /**
-     * Тест умножения матриц 4×4.
+     * Тест умножения матриц на единичную.
      * Проверяет математическое свойство: A * I = A, где I - единичная матрица.
      * Умножение любой матрицы на единичную должно дать исходную матрицу.
+     */
+    @Test
+    public void testMultiplyIdentity() {
+        float[][] arr1 = {
+            {1.0f, 2.0f, 3.0f, 4.0f},
+            {5.0f, 6.0f, 7.0f, 8.0f},
+            {9.0f, 10.0f, 11.0f, 12.0f},
+            {13.0f, 14.0f, 15.0f, 16.0f}
+        };
+        Matrix4 m1 = new Matrix4(arr1);
+        Matrix4 identity = new Matrix4();
+        Matrix4 result = m1.multiply(identity);
+        // Умножение на единичную матрицу должно дать исходную матрицу
+        for (int i = 0; i < 4; i++) {
+            for (int j = 0; j < 4; j++) {
+                Assertions.assertEquals(arr1[i][j], result.get(i, j), EPSILON);
+            }
+        }
+    }
+
+    /**
+     * Тест умножения матриц (общий случай).
+     * Проверяет корректность умножения двух произвольных матриц.
      */
     @Test
     public void testMultiply() {
@@ -179,13 +202,29 @@ public class Matrix4Test {
             {9.0f, 10.0f, 11.0f, 12.0f},
             {13.0f, 14.0f, 15.0f, 16.0f}
         };
+        float[][] arr2 = {
+            {2.0f, 0.0f, 1.0f, 0.0f},
+            {0.0f, 2.0f, 0.0f, 1.0f},
+            {1.0f, 0.0f, 2.0f, 0.0f},
+            {0.0f, 1.0f, 0.0f, 2.0f}
+        };
+        // Ожидаемый результат: arr1 * arr2
+        // Первая строка: [1,2,3,4] * arr2 = [1*2+2*0+3*1+4*0, 1*0+2*2+3*0+4*1, 1*1+2*0+3*2+4*0, 1*0+2*1+3*0+4*2]
+        // = [2+3, 0+4+4, 1+6, 2+8] = [5, 8, 7, 10]
+        float[][] expected = {
+            {5.0f, 8.0f, 7.0f, 10.0f},
+            {17.0f, 20.0f, 19.0f, 22.0f},
+            {29.0f, 32.0f, 31.0f, 34.0f},
+            {41.0f, 44.0f, 43.0f, 46.0f}
+        };
         Matrix4 m1 = new Matrix4(arr1);
-        Matrix4 m2 = new Matrix4(); // единичная
+        Matrix4 m2 = new Matrix4(arr2);
         Matrix4 result = m1.multiply(m2);
-        // Умножение на единичную матрицу должно дать исходную матрицу
+
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
-                Assertions.assertEquals(arr1[i][j], result.get(i, j), EPSILON);
+                Assertions.assertEquals(expected[i][j], result.get(i, j), EPSILON,
+                    String.format("Элемент [%d][%d] должен быть равен %.1f", i, j, expected[i][j]));
             }
         }
     }
@@ -247,20 +286,40 @@ public class Matrix4Test {
     }
 
     /**
-     * Тест вычисления обратной матрицы (бонусная функция).
-     * Проверяет математическое свойство: A * A^(-1) = I (единичная матрица).
-     * Для единичной матрицы обратная матрица - это сама единичная матрица.
+     * Тест вычисления обратной матрицы для единичной матрицы.
+     * Проверяет, что обратная матрица единичной матрицы - это сама единичная матрица.
      */
     @Test
-    public void testInverse() {
+    public void testInverseIdentity() {
         Matrix4 m = new Matrix4();
         Matrix4 inverse = m.inverse();
         // Обратная матрица единичной матрицы - это сама единичная матрица
+        Assertions.assertEquals(m, inverse);
+    }
+
+    /**
+     * Тест вычисления обратной матрицы (общий случай).
+     * Проверяет математическое свойство: A * A^(-1) = I (единичная матрица).
+     */
+    @Test
+    public void testInverse() {
+        // Создаем матрицу с известной обратной матрицей
+        // Используем диагональную матрицу [2,2,2,2], обратная = [0.5,0.5,0.5,0.5]
+        Matrix4 m = new Matrix4();
+        m.set(0, 0, 2.0f);
+        m.set(1, 1, 2.0f);
+        m.set(2, 2, 2.0f);
+        m.set(3, 3, 2.0f);
+        
+        Matrix4 inverse = m.inverse();
         Matrix4 product = m.multiply(inverse);
+        
+        // Произведение должно быть единичной матрицей
         for (int i = 0; i < 4; i++) {
             for (int j = 0; j < 4; j++) {
                 float expected = (i == j) ? 1.0f : 0.0f;
-                Assertions.assertEquals(expected, product.get(i, j), EPSILON);
+                Assertions.assertEquals(expected, product.get(i, j), EPSILON,
+                    String.format("Элемент [%d][%d] должен быть равен %.1f", i, j, expected));
             }
         }
     }
@@ -311,9 +370,6 @@ public class Matrix4Test {
             "Отрицательный индекс столбца должен вызывать исключение");
     }
 
-
-
-
     /**
      * Тест сравнения матриц
      */
@@ -324,10 +380,10 @@ public class Matrix4Test {
         Matrix4 m3 = new Matrix4();
         m3.set(0, 0, 2.0f);
         
-        Assertions.assertTrue(m1.equals(m2));
-        Assertions.assertTrue(m1.equals(m1));
-        Assertions.assertFalse(m1.equals(m3));
-        Assertions.assertFalse(m1.equals(null));
-        Assertions.assertFalse(m1.equals("not a matrix"));
+        Assertions.assertEquals(m1, m2);
+        Assertions.assertEquals(m1, m1);
+        Assertions.assertNotEquals(m1, m3);
+        Assertions.assertNotEquals(m1, null);
+        Assertions.assertNotEquals(m1, "not a matrix");
     }
 }

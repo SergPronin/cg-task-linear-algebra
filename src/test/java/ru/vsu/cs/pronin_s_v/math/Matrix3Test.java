@@ -164,8 +164,30 @@ public class Matrix3Test {
     }
 
     /**
-     * Тест умножения матриц.
+     * Тест умножения матриц на единичную.
      * Умножение любой матрицы на единичную должно дать исходную матрицу.
+     */
+    @Test
+    public void testMultiplyIdentity() {
+        float[][] arr1 = {
+            {1.0f, 2.0f, 3.0f},
+            {4.0f, 5.0f, 6.0f},
+            {7.0f, 8.0f, 9.0f}
+        };
+        Matrix3 m1 = new Matrix3(arr1);
+        Matrix3 identity = new Matrix3();
+        Matrix3 result = m1.multiply(identity);
+
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                Assertions.assertEquals(arr1[i][j], result.get(i, j), EPSILON);
+            }
+        }
+    }
+
+    /**
+     * Тест умножения матриц (общий случай).
+     * Проверяет корректность умножения двух произвольных матриц.
      */
     @Test
     public void testMultiply() {
@@ -175,9 +197,15 @@ public class Matrix3Test {
             {7.0f, 8.0f, 9.0f}
         };
         float[][] arr2 = {
-            {1.0f, 0.0f, 0.0f},
-            {0.0f, 1.0f, 0.0f},
-            {0.0f, 0.0f, 1.0f}
+            {2.0f, 0.0f, 1.0f},
+            {1.0f, 2.0f, 0.0f},
+            {0.0f, 1.0f, 2.0f}
+        };
+        // Ожидаемый результат: arr1 * arr2
+        float[][] expected = {
+            {4.0f, 7.0f, 7.0f},   // строка 0: 1*2+2*1+3*0, 1*0+2*2+3*1, 1*1+2*0+3*2
+            {13.0f, 16.0f, 16.0f}, // строка 1: 4*2+5*1+6*0, 4*0+5*2+6*1, 4*1+5*0+6*2
+            {22.0f, 25.0f, 25.0f}  // строка 2: 7*2+8*1+9*0, 7*0+8*2+9*1, 7*1+8*0+9*2
         };
         Matrix3 m1 = new Matrix3(arr1);
         Matrix3 m2 = new Matrix3(arr2);
@@ -185,7 +213,8 @@ public class Matrix3Test {
 
         for (int i = 0; i < 3; i++) {
             for (int j = 0; j < 3; j++) {
-                Assertions.assertEquals(arr1[i][j], result.get(i, j), EPSILON);
+                Assertions.assertEquals(expected[i][j], result.get(i, j), EPSILON,
+                    String.format("Элемент [%d][%d] должен быть равен %.1f", i, j, expected[i][j]));
             }
         }
     }
@@ -228,7 +257,8 @@ public class Matrix3Test {
 
     /**
      * Тест вычисления определителя матрицы.
-     * Проверяет определитель единичной матрицы (должен быть 1) и конкретной матрицы.
+     * Проверяет определитель единичной матрицы (должен быть 1), нулевой матрицы (должен быть 0)
+     * и конкретной матрицы.
      */
     @Test
     public void testDeterminant() {
@@ -236,14 +266,19 @@ public class Matrix3Test {
         Matrix3 m1 = new Matrix3();
         Assertions.assertEquals(1.0f, m1.determinant(), EPSILON);
         
-        // Проверяем конкретную матрицу
+        // Нулевая матрица имеет определитель 0
+        Matrix3 m2 = Matrix3.zero();
+        Assertions.assertEquals(0.0f, m2.determinant(), EPSILON);
+        
+        // Проверяем конкретную матрицу: det = 1*(1*0-4*6) - 2*(0*0-4*5) + 3*(0*6-1*5)
+        // = 1*(0-24) - 2*(0-20) + 3*(0-5) = -24 + 40 - 15 = 1
         float[][] arr = {
             {1.0f, 2.0f, 3.0f},
             {0.0f, 1.0f, 4.0f},
             {5.0f, 6.0f, 0.0f}
         };
-        Matrix3 m2 = new Matrix3(arr);
-        Assertions.assertEquals(1.0f, m2.determinant(), EPSILON);
+        Matrix3 m3 = new Matrix3(arr);
+        Assertions.assertEquals(1.0f, m3.determinant(), EPSILON);
     }
 
     /**
@@ -278,9 +313,6 @@ public class Matrix3Test {
             "Отрицательный индекс столбца должен вызывать исключение");
     }
 
-
-
-
     /**
      * Тест сравнения матриц
      */
@@ -291,10 +323,10 @@ public class Matrix3Test {
         Matrix3 m3 = new Matrix3();
         m3.set(0, 0, 2.0f);
         
-        Assertions.assertTrue(m1.equals(m2));
-        Assertions.assertTrue(m1.equals(m1));
-        Assertions.assertFalse(m1.equals(m3));
-        Assertions.assertFalse(m1.equals(null));
-        Assertions.assertFalse(m1.equals("not a matrix"));
+        Assertions.assertEquals(m1, m2);
+        Assertions.assertEquals(m1, m1);
+        Assertions.assertNotEquals(m1, m3);
+        Assertions.assertNotEquals(m1, null);
+        Assertions.assertNotEquals(m1, "not a matrix");
     }
 }

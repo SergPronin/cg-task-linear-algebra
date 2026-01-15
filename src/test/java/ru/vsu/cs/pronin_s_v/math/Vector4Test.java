@@ -163,13 +163,10 @@ public class Vector4Test {
         Vector4 v2 = new Vector4(TEST_X, TEST_Y, TEST_Z, TEST_W);
         Vector4 v3 = new Vector4(TEST_X + 1.0f, TEST_Y, TEST_Z, TEST_W);
         
-        Assertions.assertTrue(v1.equals(v2));
-        Assertions.assertTrue(v1.equals(v1));
-        Assertions.assertFalse(v1.equals(v3));
-        Assertions.assertFalse(v1.equals(null));
-        Assertions.assertFalse(v1.equals("not a vector"));
+        Assertions.assertEquals(v1, v2);
+        Assertions.assertEquals(v1, v1);
+        Assertions.assertNotEquals(v1, v3);
+        Assertions.assertNotEquals(v1, null);
+        Assertions.assertNotEquals(v1, "not a vector");
     }
-
-
-
 }
